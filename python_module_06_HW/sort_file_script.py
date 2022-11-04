@@ -37,10 +37,10 @@ def unpack(archive_path, path_to_unpack):
 
 def is_file_exists(i, dr):
     """Функція перевіряє, чи вже існує файл з такою назвою.
-    Якщо існує, то добавляє до назви '(1)'"""
+    Якщо існує, то добавляє до назви круглих дужках 3 рандомних символи"""
     if i in dr.iterdir():
         add_name = ""
-        for _ in range(5):
+        for _ in range(3):
             ch = random.choice(string.ascii_letters + string.digits)
             add_name += str(ch)
 
