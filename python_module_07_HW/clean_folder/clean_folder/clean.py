@@ -1,8 +1,8 @@
-import shutil
-from pathlib import Path
 import collections
+import shutil
 import sys
 from datetime import datetime
+from pathlib import Path
 
 # створюємо словник, згідно якого визначаємо правила сортування файлів:
 suffix_dict = {
@@ -29,42 +29,70 @@ def normalize(name):
     return name.translate(TRANS)
 
 
-def is_file_exists(i, dr):
+def is_file_exists(file, dr):
     """Функція перевіряє, чи вже існує файл з такою назвою.
     Якщо файл з такою назвою існує, то до назви файла в кінець добавляє дату та час переміщення файлу'"""
 
-    if i in dr.iterdir():
+    if file in dr.iterdir():
         add_name = datetime.now().strftime("%d_%m_%Y_%H_%M_%S_%f")
-        name = i.resolve().stem + f"_{add_name}_" + i.suffix
-        file_path = Path(dr, name)
-        return file_path
-    return i
+        new_name = file.resolve().stem + f"_{add_name}_" + file.suffix
+        new_name_path = Path(dr, new_name)
+        return new_name_path
+    return file
 
 
-def is_fold_exists(i, dr):
+def is_fold_exists(file, dr):
     """ Перевіряємо чи існує необхідна папка, якщо немає - створюємо;
-    і - посилання на файл, який переміщаємо;    dr - посилання на папку, куди необхідно перемістити файл."""
+    file - посилання на файл, який переміщаємо;    dr - посилання на папку, куди необхідно перемістити файл."""
     if dr.exists():
-        folder_sort(i, dr) # передає на функцію, що змінює назву та переміщує файл
+        folder_sort(file, dr) # передає на функцію, що змінює назву та переміщує файл
     else:
         Path(dr).mkdir()   # створюємо папку з необхідною назвою
-        folder_sort(i, dr) # передає на функцію, що змінює назву та переміщує файл
+        folder_sort(file, dr) # передає на функцію, що змінює назву та переміщує файл
+    
 
-
-def folder_sort(i, dr):
+def folder_sort(file, dr):
     """ змінює назву файла та переміщає в необхідну папку.
-    і - посилання на файл,  який переміщаємо;    dr - посилання, на папку, куди необхідно перемістити файл."""
-    latin_name = normalize(i.name)    
+    file - посилання на файл,  який переміщаємо;    dr - посилання, на папку, куди необхідно перемістити файл."""
+    latin_name = normalize(file.name)    
     new_file = Path(dr, latin_name)   # створюємо шлях до файла з новою назвою
     file_path = is_file_exists(new_file, dr)     # перевіряємо чи вже існує файл з такою назвою
-    i.replace(file_path)              # переміщуємо файл
+    file.replace(file_path)              # переміщуємо файл
+
+
+def show_result(p):
+    total_dict = collections.defaultdict(list)  # збираємо розширення файлів
+    files_dict = collections.defaultdict(list)  # збираємо назви файлів
+
+    for item in p.iterdir():
+        if item.is_dir():
+            for file in item.iterdir():
+                if file.is_file():
+                    total_dict[item.name].append(file.suffix)
+                    files_dict[item.name].append(file.name) 
+    for k, v in files_dict.items():
+        print()
+        print(f" Вміст папки '{k}': ")
+        print(f" ---- {v}")
+
+    print()
+    print("======================= Сортування файлів успішно завершено! =======================")
+    print()
+    print("-------------------------------------------------------------------------------------")
+    print("| {:^15} | {:^12} | {:^48} |".format("Назва папки ", "к-ть файлів", "розширення файлів"))
+    print("-------------------------------------------------------------------------------------")
+
+    for key, value in total_dict.items():
+        k, a, b = key, len(value), ", ".join(set(value))
+        print("| {:<15} | {:^12} | {:<48} |".format(k, a, b))
+
+    print("-------------------------------------------------------------------------------------")
+    print()
 
 
 
-def sort_file(folder, path):
+def sort_file(folder, p):
     """ Перевіряє кожну папку та файли по їх розширенню, організовує сортування файлів, та заміну їх назв"""
-    p = Path(path)
-
     for i in p.iterdir():
         if i.name in ("documents", "audio", "video", "images", "archives", "other"): # задаємо перелік папок, для яких сортування вмісту не застосовуємо.
             continue
@@ -99,73 +127,29 @@ def sort_file(folder, path):
                         path_to_unpack = Path(p, "archives", arch_dir_name) # створюємо шлях до папки розпаковки архіва
                         shutil.unpack_archive(arch, path_to_unpack)
                     except:
-                        print(f"\nУвага: Помилка розпаковки архіву '{arch.name}'!\n")
+                        print(f"Увага: Помилка розпаковки архіву '{arch.name}'!\n")
+                    finally:
                         continue
                 else:
                     continue
         elif i.is_dir() and not len(list(i.iterdir())):
             # видалення пустих папок, що залишилися після рекурсивного обходу:
             shutil.rmtree(i)
+    
 
 
 def main():
+    path = sys.argv[1]  # запускаємо через командну строку. Передаємо шлях до папки, в якій необхідно відсортувати файли
+    # path = r"/home/oleksandr/Стільниця/trash"
+    folder = Path(path)
+    p = Path(path)
     try:
-        path = sys.argv[1]  # запускаємо через командну строку. Передаємо шлях до папки, в якій необхідно відсортувати файли
-        # path = r"/home/oleksandr/Стільниця/trash"
-        folder = Path(path)
-        p = Path(path)
-        print()
-        print("Ваші файли будуть відсортовані за такими умовами:")
-        print()
-        print("---------------------------------------------------------------------------------")
-
-        print("| {:^14} | {:^60} |".format("Назва папки ", "розширення файлів"))
-        print("---------------------------------------------------------------------------------")
-
-        for k, v in suffix_dict.items():
-            b = ", ".join(v)
-            print("| {:<14} | {:<60} |".format(k, b))
-        print("---------------------------------------------------------------------------------")
-        print("Всі інші файли будуть переміщені в папку 'other'")
-        answer = input("Ви бажаєте відсортувати файли в Вашій папці за цими умовами? (y / n)  ")
-        if answer.lower() == "y":
-            sort_file(folder, path)
-        else:
-            return
+        sort_file(folder, p)
     except FileNotFoundError:
-        print("\nЗаданої папки не знайдено. Перевірте шлях до папки та запустіть команду сортування файлів ще раз\n")
+        print("\nЗаданої папки не знайдено. Перевірте шлях до папки та запустіть команду сортування файлів ще раз.\n")
+        return
+    return show_result(p)
 
-
-    # Виведення результатів:
-    # збираємо статистику сортування файлів у словники
-    total_dict = collections.defaultdict(list)  # збираємо всі розширення файлів, що містяться у папці
-    files_dict = collections.defaultdict(list)  # збираємо назви всіх файлів, що містяться у папці
-
-    for item in p.iterdir():
-        if item.is_dir():
-            for file in item.iterdir():
-                if file.is_file():
-                    total_dict[item.name].append(file.suffix)  # збираємо всі розширення файлів, що містяться у папці
-                    files_dict[item.name].append(file.name)    # збираємо назви всіх файлів, що містяться у папці
-
-    for k, v in files_dict.items():
-        print()
-        print(f" Вміст папки '{k}': ")
-        print(f" ---- {v}")
-
-    print()
-    print("======================= Сортування файлів успішно завершено! =======================")
-    print()
-    print("-------------------------------------------------------------------------------------")
-    print("| {:^15} | {:^12} | {:^48} |".format("Назва папки ", "к-ть файлів", "розширення файлів"))
-    print("-------------------------------------------------------------------------------------")
-
-    for key, value in total_dict.items():
-        k, a, b = key, len(value), ", ".join(set(value))
-        print("| {:<15} | {:^12} | {:<48} |".format(k, a, b))
-
-    print("-------------------------------------------------------------------------------------")
-    print()
 
 if __name__ == "__main__":
     main()
