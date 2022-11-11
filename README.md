@@ -1,2 +1,2 @@
-# python_core
-# Solving the tasks from GoIT course
+## **Python core**
+ _Solving the tasks from GoIT course_
