@@ -51,20 +51,22 @@ def get_birthdays_per_week(users, period=7):
         # для виводу результату згідно умови задачі, перетворимо список іменинників на строку:
         lst = ", ".join(dct[d])
         print(f"{weekdays[d.weekday()]}: {lst}")
+    if len(dct) == 0:
+        print("В данний період днів народження немає!")
 
 
 if __name__ == "__main__":
 
     users = [
-    {"Tanya": datetime(1985, 11, 15)},
-    {"Galyna": datetime(1955, 11, 13)},
-    {"Vasil": datetime(1955, 11, 13)},
-    {"Sasha": datetime(1976, 11, 15)},
-    {"Sofiya": datetime(2013, 11, 14)},
-    {"Roman": datetime(2016, 11, 20)},
-    {"Mukola": datetime(1979, 11, 22)},
-    {"Andriy": datetime(2003, 11, 16)},
-    {"Ulya": datetime(1996, 11, 29)}
-]
+    # {"Tanya": datetime(1985, 11, 15)},
+    # {"Galyna": datetime(1955, 11, 13)},
+    # {"Vasil": datetime(1955, 11, 13)},
+    # {"Sasha": datetime(1976, 11, 15)},
+    # {"Sofiya": datetime(2013, 11, 14)},
+    # {"Roman": datetime(2016, 11, 20)},
+    # {"Mukola": datetime(1979, 11, 22)},
+    # {"Andriy": datetime(2003, 11, 16)},
+    # {"Ulya": datetime(1996, 11, 29)}
+    ]
 
     get_birthdays_per_week(users, 4)
