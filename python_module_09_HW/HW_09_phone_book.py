@@ -3,17 +3,14 @@ phone_book = {}
 
 
 def format_phone_number(func):
-    """ Декоратор для приведення номеру телефону до міжнародного стандарту
-    перевіряє довжину номера """
+    """ Декоратор для приведення номеру телефону до міжнародного стандарту """
 
     def wrapper(num):
         new_num = func(num)
         if len(new_num) == 12:
             return f"+{new_num}"
-        elif len(new_num) == 10:
-            return f"+38{new_num}"
         else:
-            print("Phone's number is too short!")
+            return f"+38{new_num}"
     return wrapper
 
 
@@ -36,22 +33,22 @@ def input_error(func):
             result = func(*args, **kwargs)
             return result
         except KeyError:
-            print("Enter user name")
+            return "Enter user name"
         except ValueError:
-            print("Phone's number is not correct!")
+            return "Phone's number is not correct!"
         except IndexError:
-            print("Give me name and phone please")
+            return "Give me name and phone please"
     return wrapper
 
 
 @input_error
 def say_hello(lst):
-    print("How can I help you?")
+    return "How can I help you?"
 
 
 @input_error
 def say_goodbye(lst):
-    print("Good bye!")
+    return "Good bye!"
 
 
 @input_error
@@ -64,22 +61,28 @@ def set_number(lst):
     # Запис відбудеться, тільки якщо номер складається лише з цифр та має достатню довжину:
     if phone:
         phone_book[name.title()] = phone
+        return f"Contact {name.title()} was created/updated"
+    else:
+        return ""
+
 
 
 @input_error
 def show_phone(lst):
     """ Функція відображає номер телефону абонента, ім'я якого було в команді 'phone ...'"""
     name = " ".join(lst)
-    print(phone_book[name.title()])
+    return phone_book[name.title()]
 
 
 @input_error
 def show_all(lst):
     """ Функція виводить всі записи в телефонній книзі при команді 'show all' """
     if len(phone_book) == 0:
-        print("Phone book is empty")
+        return "Phone book is empty"
+    text = ""
     for name, phone in phone_book.items():
-        print(f"{name} {phone}")
+        text += f"{name} {phone}\n"
+    return text.strip()
 
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
@@ -88,7 +91,7 @@ commands = {
     "show all": show_all,
     "hello": say_hello,
     ("good bye", "close", "exit"): say_goodbye
-}
+    }
 
 @input_error
 def main():
@@ -99,7 +102,7 @@ def main():
         command = command.lower().split()
         for key in commands:
             if command[0] in key:
-                commands[key](command[1:])
+                print(commands[key](command[1:]))
                 
 
 if __name__ == "__main__":
