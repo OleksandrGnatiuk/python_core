@@ -2,7 +2,7 @@
 def formatted_numbers():
     lst = ['|{:^10}|{:^10}|{:^10}|'.format("decimal", "hex", "binary")]
     for i in range(16):
-        line = '|{:<10}|{:^10}|{:>10}|'.format(i, hex(i)[2:], bin(i)[2:])
+        line = '|{0:<10d}|{0:^10x}|{0:>10b}|'.format(i)   # де: 0 - посилання на індекс "0", d, x, b- ознаки систем числення
         lst.append(line)
     return lst
 
