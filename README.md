@@ -1,2 +1,2 @@
 ### Python core
- _Solving tasks from GoIT course_
+ _My solutions of the most interesting tasks from the GoIT Python Core course_
