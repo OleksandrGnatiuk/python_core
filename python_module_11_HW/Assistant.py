@@ -86,14 +86,10 @@ class AddressBook(UserDict):
     def show_records(self):
         return self.data
 
-    def __next__(self):
-        if self.current_index < len(self.data):
-            self.current_index += 1
-            return self.data[self.current_index - 1]
-        raise StopIteration
+    def iterator(self):
+        for record in self.data.values():
+            yield record
 
-    def __iter__(self):
-        return AddressBook()
 
 
 class Record:
@@ -113,15 +109,12 @@ class Record:
         cur_year = cur_date.year
 
         if self.birthday is not None:
-            this_year_birthday = datetime(cur_year, self.birthday.month,
-                                          self.birthday.day).date()
+            this_year_birthday = datetime(cur_year, self.birthday.month, self.birthday.day).date()
             delta = this_year_birthday - cur_date
             if delta.days >= 0:
                 return f"{self.name}'s birthday will be in {delta.days} days"
             else:
-                next_year_birthday = datetime(cur_year + 1,
-                                              self.birthday.month,
-                                              self.birthday.day).date()
+                next_year_birthday = datetime(cur_year + 1, self.birthday.month, self.birthday.day).date()
                 delta = next_year_birthday - cur_date
                 return f"{self.name}'s birthday will be in {delta.days} days"
 
@@ -146,25 +139,25 @@ class Record:
 sasha = Record("Sasha")
 roman = Record("Roman")
 sasha_phone = Phone("(067)874-28-45")
-print(sasha_phone)
+# print(sasha_phone)
 sasha.add_phone(sasha_phone)
 sasha.add_phone("050-11-222-1")
 roman.add_phone("0971-1110-11")
 # sasha.change_phone("0665555555")
 # sasha.delete_phone()
-# print(sasha.birthday)
 # print(sasha.show_contact())
 
 my_book = AddressBook()
 
 my_book.add_record(sasha)
-# print(my_book.show_records())
-# my_book.remove_record(sasha)
 my_book.add_record(roman)
+
 sasha.add_birthday(Birthday(2016, 3, 7))
 # print(sasha.birthday)
 # print(my_book.show_records())
 # print(sasha.days_to_birthday())
-
-for record in my_book.data:
-    print(my_book.data[record])
+my_book = my_book.iterator()
+# print(my_book)
+print(next(my_book))
+print(next(my_book))
+print(next(my_book))
