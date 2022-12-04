@@ -46,7 +46,8 @@ class Phone(Field):
         try:
             new_phone = [str(int(i)) for i in new_phone]
         except ValueError:
-            return "Phone's number is not correct!"
+            print("Phone's number is not correct!")
+        
         else:
             new_phone = "".join(new_phone)
             return new_phone
@@ -62,14 +63,31 @@ class Phone(Field):
 
 class Birthday(datetime):
 
+    @staticmethod
+    def validate_date(year, month, day):
+        try:
+            birthday = datetime(year=year, month=month, day=day)
+        except ValueError:
+            print("Date is not correct")
+        else:
+            return str(birthday.date())
+
     def __init__(self, year, month, day):
-        self.__birthday = datetime(year=year, month=month, day=day)
+        self.__birthday = self.validate_date(year, month, day)
 
     def __str__(self):
         return self.__birthday.strftime('%Y-%m-%d')
 
     def __repr__(self):
         return self.__birthday.strftime('%Y-%m-%d')
+
+    @property
+    def birthday(self):
+        return self.__birthday
+
+    @birthday.setter
+    def birthday(self, year, month, day):
+        self.__birthday = self.validate_date(year, month, day)
 
 
 class AddressBook(UserDict):
@@ -89,7 +107,6 @@ class AddressBook(UserDict):
     def iterator(self):
         for record in self.data.values():
             yield record
-
 
 
 class Record:
@@ -118,8 +135,9 @@ class Record:
                 delta = next_year_birthday - cur_date
                 return f"{self.name}'s birthday will be in {delta.days} days"
 
-    def add_birthday(self, birthday):
-        self.birthday = birthday
+    def add_birthday(self, year, month, day):
+        self.birthday = Birthday.validate_date(year, month, day)
+         
 
     def add_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)
@@ -142,7 +160,7 @@ sasha_phone = Phone("(067)874-28-45")
 # print(sasha_phone)
 sasha.add_phone(sasha_phone)
 sasha.add_phone("050-11-222-1")
-roman.add_phone("0971-1110-11")
+roman.add_phone("0971-110-11")
 # sasha.change_phone("0665555555")
 # sasha.delete_phone()
 # print(sasha.show_contact())
@@ -152,12 +170,11 @@ my_book = AddressBook()
 my_book.add_record(sasha)
 my_book.add_record(roman)
 
-sasha.add_birthday(Birthday(2016, 3, 7))
+sasha.add_birthday(2016, 3, 7)
 # print(sasha.birthday)
 # print(my_book.show_records())
 # print(sasha.days_to_birthday())
 my_book = my_book.iterator()
 # print(my_book)
-print(next(my_book))
 print(next(my_book))
 print(next(my_book))
