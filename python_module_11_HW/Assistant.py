@@ -19,38 +19,30 @@ class Name(Field):
 
 class Phone(Field):
 
+    @staticmethod
+    def sanitize_phone_number(phone):
+
+        new_phone = str(phone).strip().removeprefix("+").replace(
+            "(", "").replace(")", "").replace("-", "").replace(" ", "")
+        try:
+            new_phone = [str(int(i)) for i in new_phone]
+        except ValueError:
+            print("Phone's number is not correct!")
+
+        else:
+            new_phone = "".join(new_phone)
+            if len(new_phone) == 12:
+                return f"+{new_phone}"
+            elif len(new_phone) == 10:
+                return f"+38{new_phone}"
+            else:
+                print("Length of phone's number is wrong")
+
     def __init__(self, phone):
         self.__phone = Phone.sanitize_phone_number(phone)
 
     def __str__(self):
         return self.__phone
-
-    def format_phone_number(func):
-        """ Декоратор для приведення номеру телефону до міжнародного стандарту """
-
-        def wrapper(num):
-            new_num = func(num)
-            if len(new_num) == 12:
-                return f"+{new_num}"
-            else:
-                return f"+38{new_num}"
-        return wrapper
-
-
-    @format_phone_number
-    @staticmethod
-    def sanitize_phone_number(phone):
-
-        new_phone = str(phone).strip().removeprefix("+").replace("(", "").replace(
-            ")", "").replace("-", "").replace(" ", "")
-        try:
-            new_phone = [str(int(i)) for i in new_phone]
-        except ValueError:
-            print("Phone's number is not correct!")
-        
-        else:
-            new_phone = "".join(new_phone)
-            return new_phone
 
     @property
     def phone(self):
@@ -126,22 +118,25 @@ class Record:
         cur_year = cur_date.year
 
         if self.birthday is not None:
-            this_year_birthday = datetime(cur_year, self.birthday.month, self.birthday.day).date()
+            this_year_birthday = datetime(cur_year, self.birthday.month,
+                                          self.birthday.day).date()
             delta = this_year_birthday - cur_date
             if delta.days >= 0:
                 return f"{self.name}'s birthday will be in {delta.days} days"
             else:
-                next_year_birthday = datetime(cur_year + 1, self.birthday.month, self.birthday.day).date()
+                next_year_birthday = datetime(cur_year + 1,
+                                              self.birthday.month,
+                                              self.birthday.day).date()
                 delta = next_year_birthday - cur_date
                 return f"{self.name}'s birthday will be in {delta.days} days"
 
     def add_birthday(self, year, month, day):
         self.birthday = Birthday.validate_date(year, month, day)
-         
 
     def add_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)
-        self.phone.append(phone)
+        if phone:
+            self.phone.append(phone)
 
     def change_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)
@@ -154,27 +149,27 @@ class Record:
         return self.__dict__
 
 
-sasha = Record("Sasha")
-roman = Record("Roman")
-sasha_phone = Phone("(067)874-28-45")
+# sasha = Record("Sasha")
+# roman = Record("Roman")
+# sasha_phone = Phone("(067)874-28-45")
 # print(sasha_phone)
-sasha.add_phone(sasha_phone)
-sasha.add_phone("050-11-222-1")
-roman.add_phone("0971-110-11")
-# sasha.change_phone("0665555555")
+# sasha.add_phone(sasha_phone)
+# sasha.add_phone("050-112-1")
+# roman.add_phone("09712-1d0-11")
+# roman.change_phone("0665555555")
 # sasha.delete_phone()
 # print(sasha.show_contact())
 
-my_book = AddressBook()
+# my_book = AddressBook()
 
-my_book.add_record(sasha)
-my_book.add_record(roman)
+# my_book.add_record(sasha)
+# my_book.add_record(roman)
 
-sasha.add_birthday(2016, 3, 7)
+# sasha.add_birthday(2016, 3, 7)
 # print(sasha.birthday)
 # print(my_book.show_records())
 # print(sasha.days_to_birthday())
-my_book = my_book.iterator()
+# my_book = my_book.iterator()
 # print(my_book)
-print(next(my_book))
-print(next(my_book))
+# print(next(my_book))
+# print(next(my_book))
