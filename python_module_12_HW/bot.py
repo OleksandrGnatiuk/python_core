@@ -1,4 +1,5 @@
 import pickle
+import re
 from Classes import address_book, Record
 from exceptions import input_error
 
@@ -8,6 +9,16 @@ def save_to_pickle():
 
     with open("address_book.bin", "wb") as file:
         pickle.dump(address_book.data, file)
+
+
+def search(value: str):
+    for record in address_book:
+        contact = address_book[record]
+        for text in contact.get_contact().values():
+            if text != None:
+                if re.findall(value, text):
+                    print(address_book[record].get_contact())
+                    break
 
 
 def say_hello(s):
@@ -110,6 +121,7 @@ def show_all(s):
 
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
+    "search": search,
     "add birthday": contact_birthday,
     "days to birthday": days_to_birthday,
     "add contact": add_contact,
