@@ -142,7 +142,7 @@ class Record:
             return f"{self.name}'s birthday is unknown"
 
     def add_birthday(self, year, month, day):
-        self.birthday = Birthday.validate_date(year, month, day)
+        self.birthday = Birthday.validate_date(int(year), int(month), int(day))
 
     def add_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)

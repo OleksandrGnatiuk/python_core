@@ -33,6 +33,18 @@ def add_contact(value):
 
 
 @input_error
+def contact_birthday(value):
+    name, birthday = value.lower().strip().split()
+    birthday = tuple(birthday.split("-"))
+    if name.title() in address_book:
+        address_book[name.title()].add_birthday(*birthday)
+        save_to_pickle()
+    else:
+        return f"Contact {name.title()} does not exists"
+
+
+
+@input_error
 def change_contact(name: str):
     pass
 
@@ -53,7 +65,7 @@ def contact(name):
         record = address_book[name.title()]
         return record.get_contact()
     else:
-        return f"Contact {name.title()} is not exist"
+        return f"Contact {name.title()} does not exist"
 
 
 def help(s):
@@ -79,6 +91,7 @@ def show_all(s):
 
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
+    "add birthday": contact_birthday,
     "add": add_contact,
     "change": change_contact,
     "remove": remove_contact,
@@ -108,5 +121,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+    save_to_pickle()
 
     
