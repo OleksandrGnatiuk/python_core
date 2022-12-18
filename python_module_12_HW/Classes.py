@@ -97,7 +97,7 @@ class AddressBook(UserDict):
         self.data[str(record.name)] = record
 
     def remove_record(self, record):
-        self.data.pop(record.name, None)
+        self.data.pop(str(record.name), None)
 
     def all_records(self):
         return {key: value.get_contact() for key, value in self.data.items()}
@@ -172,7 +172,6 @@ address_book = AddressBook()
 if p.exists():
     with open("address_book.bin", "rb") as file:
         address_book.data = pickle.load(file)
-
 """------------------------------------"""
 # sasha = Record("Sasha")
 # roman = Record("Roman")
