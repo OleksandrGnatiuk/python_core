@@ -122,7 +122,7 @@ class Record:
         else:
             self.phones = [Phone(phone)]
 
-    def days_to_birthday(self):
+    def days_to_bd(self):
         cur_date = datetime.now().date()
         cur_year = cur_date.year
 

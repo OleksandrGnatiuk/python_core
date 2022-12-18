@@ -43,6 +43,20 @@ def contact_birthday(value):
         return f"Contact {name.title()} does not exists"
 
 
+def days_to_birthday(name):
+    if name.title() in address_book:
+        if not address_book[name.title()].birthday is None:
+            days = address_book[name.title()].days_to_bd()
+            save_to_pickle()
+            return days
+        else:
+            return f"{name.title()}'s birthday is unknown"
+    else:
+        return f"Contact {name.title()} does not exists"
+
+
+
+
 
 @input_error
 def change_contact(name: str):
@@ -92,6 +106,7 @@ def show_all(s):
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
     "add birthday": contact_birthday,
+    "days to birthday": days_to_birthday,
     "add": add_contact,
     "change": change_contact,
     "remove": remove_contact,
