@@ -71,7 +71,7 @@ class Birthday(datetime):
         try:
             birthday = datetime(year=year, month=month, day=day)
         except ValueError:
-            print("Date is not correct")
+            print("Date is not correct\nPlease write 'yyyy-m-d'")
         else:
             return str(birthday.date())
 
@@ -147,9 +147,12 @@ class Record:
     def add_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)
         if phone:
-            self.phones.append(Phone(phone))
+            lst = [phone.phone for phone in self.phones]
+            if phone not in lst:
+                self.phones.append(Phone(phone))
+                return "Phone was added"
         else:
-            raise ValueError("Перевірте правильніть номера")
+            raise ValueError("Phone number is not correct")
 
     def change_phone(self, old_phone, new_phone):
         old_phone = Phone.sanitize_phone_number(old_phone)
@@ -158,12 +161,13 @@ class Record:
         for phone in self.phones:
             if phone.phone == old_phone:
                 phone.phone = new_phone
-                return f"phone was changed"
-        else:
-            print(f"Phone {old_phone} does not exist")
-
-    def delete_phone(self):
-        self.phone = []
+                return "phone was changed"
+        
+    def delete_phone(self, phone):
+        phone = Phone.sanitize_phone_number(phone)
+        for ph in self.phones:
+            if ph.phone == phone:
+                self.phones.remove(ph)
 
     def get_contact(self):
         phones = ", ".join([str(p) for p in self.phones])

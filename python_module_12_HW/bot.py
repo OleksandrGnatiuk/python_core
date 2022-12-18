@@ -5,13 +5,16 @@ from exceptions import input_error
 
 
 def save_to_pickle():
-    """ Функція зберігає дані у зовнішній файл"""
+    """ Save address book in pickle file"""
 
     with open("address_book.bin", "wb") as file:
         pickle.dump(address_book.data, file)
 
 
+@input_error
 def search(value: str):
+    """Search contact where is 'text' in fields: name, phone"""
+
     for record in address_book:
         contact = address_book[record]
         for text in contact.get_contact().values():
@@ -31,6 +34,7 @@ def say_goodbye(s=None):
 
 @input_error
 def add_contact(value):
+    """ Add new contact to address book"""
     name, *phones = value.lower().strip().split()
 
     if not name.title() in address_book:
@@ -39,13 +43,36 @@ def add_contact(value):
         for phone in phones:
             record.add_phone(phone)
             save_to_pickle()
-        return f"Contact {name} was created"
+        return f"Contact {name.title()} was created"
     else:
         return f"Contact {name.title()} already exists"
 
 
 @input_error
-def contact_birthday(value):
+def add_phone(value):
+    name, phone = value.lower().strip().split()
+
+    if name.title() in address_book:
+        address_book[name.title()].add_phone(phone)
+        save_to_pickle()
+    else:
+        return f"Contact {name.title()} does not exist"
+
+
+@input_error
+def remove_phone(value):
+    name, phone = value.lower().strip().split()
+
+    if name.title() in address_book:
+        address_book[name.title()].delete_phone(phone)
+        save_to_pickle()
+        return f"Phone for {name.title()} was delete"
+    else:
+        return f"Contact {name.title()} does not exist"
+
+
+@input_error
+def add_contact_birthday(value):
     name, birthday = value.lower().strip().split()
     birthday = tuple(birthday.split("-"))
 
@@ -98,19 +125,6 @@ def contact(name):
         return f"Contact {name.title()} does not exist"
 
 
-def help(s):
-    rules = """List of commands:
-    1) if you want to add new contact, please write command: add {name} {phone number}
-    2) if you want to change contact, please write command: change {name} {phone number}
-    3) if you want to see the phone of contact, please write command: phone {name}
-    4) if you want to see all contacts, please write command: show all
-    5) if you want to say goodbye, please write one of these commands: good bye / close / exit
-    6) if you want to say hello, please write command: hello
-    7) if you want remove contact, please write command: remove {name}
-    """
-    return rules
-
-
 def show_all(s):
     """ Функція виводить всі записи в телефонній книзі при команді 'show all' """
     if len(address_book) == 0:
@@ -119,14 +133,38 @@ def show_all(s):
         print(record.get_contact())
 
 
+def help(value):
+    rules = """List of commands:
+    1) to add new contact and one or more phones, write command: add contact {name} {phone number} {phone number} {phone number}
+    2) to remove contact, write command: remove contact {name}
+
+    3) to add phone, write command: add phone {name} {one phone}
+    4) to change phone, write command: change phone {name} {old phone} {new phone}
+    5) to remove phone, write command: remove phone {name} {old phone}
+
+    6) to add birthday of contact, write command: add birthday {name} {yyyy-m-d}
+    7) to see how many days to contact's birthday, write command: days to birthday {name}
+
+    8) to search contact, where is 'text', write command: search {text}
+    9) to see full record of contact, write: phone {name}
+    10) to see all contacts, write command: show all
+    11) to say goodbye, write one of these commands: good bye / close / exit
+    12) to say hello, write command: hello
+    13) to see help, write command: help
+    """
+    return rules
+
+
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
-    "search": search,
-    "add birthday": contact_birthday,
-    "days to birthday": days_to_birthday,
     "add contact": add_contact,
+    "remove contact": remove_contact,
+    "add phone": add_phone,
     "change phone": change_ph,
-    "remove": remove_contact,
+    "remove phone": remove_phone,
+    "add birthday": add_contact_birthday,
+    "days to birthday": days_to_birthday,
+    "search": search,
     "phone": contact,
     "show all": show_all,
     "hello": say_hello,
@@ -148,7 +186,8 @@ def main():
 
         for key in commands:
             if command.lower().strip().startswith(key):
-                print(commands[key](command[len(key):].strip()))
+                print(commands[key]
+                      (command[len(key):].strip()))
                 break
 
 
