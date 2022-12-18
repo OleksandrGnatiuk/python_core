@@ -4,10 +4,10 @@ from exceptions import input_error
 
 
 def save_to_pickle():
-        """ Функція зберігає дані у зовнішній файл"""
+    """ Функція зберігає дані у зовнішній файл"""
 
-        with open("address_book.bin", "wb") as file:
-            pickle.dump(address_book.data, file)
+    with open("address_book.bin", "wb") as file:
+        pickle.dump(address_book.data, file)
 
 
 def say_hello(s):
@@ -21,6 +21,7 @@ def say_goodbye(s=None):
 @input_error
 def add_contact(value):
     name, *phones = value.lower().strip().split()
+
     if not name.title() in address_book:
         record = Record(name)
         address_book.add_record(record)
@@ -36,6 +37,7 @@ def add_contact(value):
 def contact_birthday(value):
     name, birthday = value.lower().strip().split()
     birthday = tuple(birthday.split("-"))
+
     if name.title() in address_book:
         address_book[name.title()].add_birthday(*birthday)
         save_to_pickle()
@@ -43,11 +45,11 @@ def contact_birthday(value):
         return f"Contact {name.title()} does not exists"
 
 
+@input_error
 def days_to_birthday(name):
     if name.title() in address_book:
         if not address_book[name.title()].birthday is None:
             days = address_book[name.title()].days_to_bd()
-            save_to_pickle()
             return days
         else:
             return f"{name.title()}'s birthday is unknown"
@@ -55,12 +57,15 @@ def days_to_birthday(name):
         return f"Contact {name.title()} does not exists"
 
 
-
-
-
 @input_error
-def change_contact(name: str):
-    pass
+def change_ph(value: str):
+    name, old_phone, new_phone = value.split()
+
+    if name.title() in address_book:
+        address_book[name.title()].change_phone(old_phone, new_phone)
+        save_to_pickle()
+    else:
+        return f"Contact {name.title()} does not exists"
 
 
 @input_error
@@ -107,8 +112,8 @@ def show_all(s):
 commands = {
     "add birthday": contact_birthday,
     "days to birthday": days_to_birthday,
-    "add": add_contact,
-    "change": change_contact,
+    "add contact": add_contact,
+    "change phone": change_ph,
     "remove": remove_contact,
     "phone": contact,
     "show all": show_all,
@@ -118,6 +123,7 @@ commands = {
     "exit": say_goodbye,
     "help": help
 }
+
 
 @input_error
 def main():
@@ -137,5 +143,3 @@ def main():
 if __name__ == "__main__":
     main()
     save_to_pickle()
-
-    

@@ -1,7 +1,7 @@
 from collections import UserDict
 from datetime import datetime
 import pickle
-import pathlib
+from pathlib import Path
 
 
 class Field:
@@ -151,9 +151,16 @@ class Record:
         else:
             raise ValueError("Перевірте правильніть номера")
 
-    def change_phone(self, phone):
-        phone = Phone.sanitize_phone_number(phone)
-        self.phones = [Phone(phone)]
+    def change_phone(self, old_phone, new_phone):
+        old_phone = Phone.sanitize_phone_number(old_phone)
+        new_phone = Phone.sanitize_phone_number(new_phone)
+
+        for phone in self.phones:
+            if phone.phone == old_phone:
+                phone.phone = new_phone
+                return f"phone was changed"
+        else:
+            print(f"Phone {old_phone} does not exist")
 
     def delete_phone(self):
         self.phone = []
@@ -167,37 +174,8 @@ class Record:
         }
 
 
-p = pathlib.Path("address_book.bin")
+p = Path("address_book.bin")
 address_book = AddressBook()
 if p.exists():
     with open("address_book.bin", "rb") as file:
         address_book.data = pickle.load(file)
-"""------------------------------------"""
-# sasha = Record("Sasha")
-# roman = Record("Roman")
-# sasha_phone = Phone("(067)874-28-45")
-# print(sasha_phone)
-# sasha.add_phone(sasha_phone)
-# sasha.add_phone("050-112-1115")
-
-# print(sasha.days_to_birthday())
-# print(roman.days_to_birthday())
-
-# roman.add_phone("09712-222-11")
-# sasha.delete_phone()
-# print(sasha.show_contact())
-
-# address_book.add_record(sasha)
-# address_book.add_record(roman)
-# roman.change_phone("0665555555")
-# sasha.add_birthday(1976, 3, 7)
-# roman.add_birthday(2016, 12, 2)
-# print(sasha.birthday)
-# print(address_book.show_records())
-# print(sasha.show_contact())
-
-# print(sasha.days_to_birthday())
-# address_book = address_book.iterator()
-# print(address_book)
-# print(next(address_book))
-# print(next(address_book))
