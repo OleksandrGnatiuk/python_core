@@ -1,3 +1,5 @@
+from Classes import LetterInPhoneError, WrongLengthPhoneError
+
 def input_error(func):
     """ Декоратор, що повідомляє про виключення """
 
@@ -11,4 +13,8 @@ def input_error(func):
             return "This record is not correct!"
         except IndexError:
             return "This command is wrong"
-    return wrapper
+        except LetterInPhoneError:
+            return "There is letter in phone number!"
+        except WrongLengthPhoneError:
+            return "Length of phone's number is wrong!"
+    return wrapper 

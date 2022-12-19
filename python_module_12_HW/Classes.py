@@ -4,6 +4,14 @@ import pickle
 from pathlib import Path
 
 
+class WrongLengthPhoneError(Exception):
+    """ Exception for wrong length of phone number"""
+
+
+class LetterInPhoneError(Exception):
+    """ Exception when is letter in phone number"""
+
+
 class Field:
 
     def __init__(self, value):
@@ -41,7 +49,7 @@ class Phone(Field):
         try:
             new_phone = [str(int(i)) for i in new_phone]
         except ValueError:
-            print("Phone's number is not correct!")
+            raise LetterInPhoneError("There is letter in phone number!")
 
         else:
             new_phone = "".join(new_phone)
@@ -50,7 +58,8 @@ class Phone(Field):
             elif len(new_phone) == 10:
                 return f"+38{new_phone}"
             else:
-                print("Length of phone's number is wrong")
+                raise WrongLengthPhoneError(
+                    "Length of phone's number is wrong")
 
     def __str__(self):
         return self.__phone
@@ -162,7 +171,7 @@ class Record:
             if phone.phone == old_phone:
                 phone.phone = new_phone
                 return "phone was changed"
-        
+
     def delete_phone(self, phone):
         phone = Phone.sanitize_phone_number(phone)
         for ph in self.phones:
