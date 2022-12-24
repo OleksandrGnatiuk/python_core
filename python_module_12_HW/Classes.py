@@ -5,11 +5,11 @@ from pathlib import Path
 
 
 class WrongLengthPhoneError(Exception):
-    """ Exception for wrong length of phone number"""
+    """ Exception for wrong length of the phone number"""
 
 
 class LetterInPhoneError(Exception):
-    """ Exception when is letter in phone number"""
+    """ Exception when a letter ts in the phone number"""
 
 
 class Field:
@@ -49,7 +49,7 @@ class Phone(Field):
         try:
             new_phone = [str(int(i)) for i in new_phone]
         except ValueError:
-            raise LetterInPhoneError("There is letter in phone number!")
+            raise LetterInPhoneError("There is letter in the phone number!")
 
         else:
             new_phone = "".join(new_phone)
@@ -59,7 +59,7 @@ class Phone(Field):
                 return f"+38{new_phone}"
             else:
                 raise WrongLengthPhoneError(
-                    "Length of phone's number is wrong")
+                    "Length of the phone's number is wrong")
 
     def __str__(self):
         return self.__phone
@@ -80,7 +80,7 @@ class Birthday(datetime):
         try:
             birthday = datetime(year=year, month=month, day=day)
         except ValueError:
-            print("Date is not correct\nPlease write 'yyyy-m-d'")
+            print("Date is not correct\nPlease write date in format: yyyy-m-d")
         else:
             return str(birthday.date())
 
