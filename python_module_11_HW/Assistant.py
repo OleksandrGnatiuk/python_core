@@ -5,22 +5,33 @@ from datetime import datetime
 class Field:
 
     def __init__(self, value):
-        self.name = value
+        self._value = value
 
     def __str__(self):
-        return self.name
+        return self._value
+
+    @property
+    def value(self):
+        return self._value
+
+    @value.setter
+    def value(self, value):
+        self._value = value
 
 
 class Name(Field):
+    """Class for creating 'name' field """
 
     def __str__(self):
-        return self.name.title()
+        return self._value.title()
 
 
 class Phone(Field):
+    """Class for creating 'phone' field """
 
     @staticmethod
     def sanitize_phone_number(phone):
+        """Method for change phone number to standart format"""
 
         new_phone = str(phone).strip().removeprefix("+").replace(
             "(", "").replace(")", "").replace("-", "").replace(" ", "")
@@ -38,22 +49,16 @@ class Phone(Field):
             else:
                 print("Length of phone's number is wrong")
 
-    def __init__(self, phone):
-        self.__phone = Phone.sanitize_phone_number(phone)
+    def __init__(self, value):
+        self._value = Phone.sanitize_phone_number(value)
 
-    def __str__(self):
-        return self.__phone
-
-    @property
-    def phone(self):
-        return self.__phone
-
-    @phone.setter
-    def phone(self, new_phone):
-        self.__phone = Phone.sanitize_phone_number(new_phone)
+    @Field.value.setter
+    def value(self, value):
+        self._value = Phone.sanitize_phone_number(value)
 
 
 class Birthday(datetime):
+    """Class for creating 'birthday' field"""
 
     @staticmethod
     def validate_date(year, month, day):
@@ -82,36 +87,18 @@ class Birthday(datetime):
         self.__birthday = self.validate_date(year, month, day)
 
 
-class AddressBook(UserDict):
-    """Class for creating addressbooks"""
-
-    current_index = 0
-
-    def add_record(self, record):
-        self.data[record.name] = record.show_contact()
-
-    def remove_record(self, record):
-        self.data.pop(record.name, None)
-
-    def show_records(self):
-        return self.data
-
-    def iterator(self):
-        for record in self.data.values():
-            yield record
-
-
 class Record:
     """Class for creating contacts"""
 
-    def __init__(self, name, phone=None, birthday: Birthday = None):
+    def __init__(self,
+                 name: Name,
+                 phone: Phone = None,
+                 birthday: Birthday = None):
         self.name = name
         self.birthday = birthday
-
-        if phone is None:
-            self.phone = []
-        else:
-            self.add_phone = [str(phone)]
+        self.phones = []
+        if isinstance(phone, Phone):
+            self.phones.append(phone)
 
     def days_to_birthday(self):
         cur_date = datetime.now().date()
@@ -134,42 +121,77 @@ class Record:
         self.birthday = Birthday.validate_date(year, month, day)
 
     def add_phone(self, phone):
-        phone = Phone.sanitize_phone_number(phone)
+        phone = Phone(phone)
         if phone:
-            self.phone.append(phone)
+            self.phones.append(phone)
 
-    def change_phone(self, phone):
-        phone = Phone.sanitize_phone_number(phone)
-        self.phone = phone
+    def change_phone(self, old_phone, new_phone):
+        old_phone = Phone(old_phone)
+        new_phone = Phone(new_phone)
 
-    def delete_phone(self):
-        self.phone = []
+        for phone in self.phones:
+            if phone.value == old_phone.value:
+                self.phones.remove(phone)
+                self.phones.append(new_phone)
+                return "phone was changed"
 
-    def show_contact(self):
-        return self.__dict__
+    def delete_phone(self, old_phone):
+        old_phone = Phone(old_phone)
+        for phone in self.phones:
+            if phone.value == old_phone.value:
+                self.phones.remove(phone)
+
+    def get_contact(self):
+        phones = ", ".join([str(p) for p in self.phones])
+        return {
+            "name": str(self.name.value),
+            "phone": phones,
+            "birthday": self.birthday,
+        }
 
 
-# sasha = Record("Sasha")
-# roman = Record("Roman")
-# sasha_phone = Phone("(067)874-28-45")
-# print(sasha_phone)
-# sasha.add_phone(sasha_phone)
-# sasha.add_phone("050-112-1")
-# roman.add_phone("09712-1d0-11")
-# roman.change_phone("0665555555")
-# sasha.delete_phone()
-# print(sasha.show_contact())
+class AddressBook(UserDict):
+    """Class for creating addressbooks"""
 
-# my_book = AddressBook()
+    def add_record(self, record: Record):
+        self.data[record.name.value] = record
 
-# my_book.add_record(sasha)
-# my_book.add_record(roman)
+    def remove_record(self, name):
+        if name in self.data:
+            self.data.pop(name)
 
-# sasha.add_birthday(2016, 3, 7)
-# print(sasha.birthday)
-# print(my_book.show_records())
-# print(sasha.days_to_birthday())
-# my_book = my_book.iterator()
-# print(my_book)
-# print(next(my_book))
-# print(next(my_book))
+    def all_records(self):
+        return {key: value.get_contact() for key, value in self.data.items()}
+
+    def iterator(self):
+        for record in self.data.values():
+            yield record.get_contact()
+
+
+if __name__ == "__main__":
+
+    sasha = Name("Sasha")
+    sasha_phone = Phone("(067)874-28-45")
+    rec_sasha = Record(sasha, sasha_phone)
+    rec_sasha.add_phone("050-112-1222")
+    rec_sasha.change_phone("050-112-1222", "095-112-1222")
+
+    roman = Name("Roman")
+    roman_phone = Phone("(067)1111111")
+    rec_roman = Record(roman, roman_phone)
+    rec_roman.add_phone("09712-100-11")
+    rec_roman.delete_phone("(067)1111111")
+
+    my_book = AddressBook()
+    my_book.add_record(rec_sasha)
+    my_book.add_record(rec_roman)
+
+    rec_sasha.add_birthday(2016, 3, 7)
+    # print(sasha.birthday)
+    # print(my_book.all_records())
+    # my_book.remove_record("Sasha")
+    print(my_book.all_records())
+
+    # my_book = my_book.iterator()
+    # print(next(my_book))
+    # print(next(my_book))
