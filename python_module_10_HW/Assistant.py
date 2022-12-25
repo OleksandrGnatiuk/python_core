@@ -1,26 +1,28 @@
 from collections import UserDict
 
 
-class AddressBook(UserDict):
-    """Class for creating addressbooks"""
+class Field:
 
-    def add_record(self, record):
-        self.data[record.name] = record.show_contact()
+    def __init__(self, value):
+        self.value = value
 
-    def remove_record(self, record):
-        self.data.pop(record.name, None)
 
-    def show_records(self):
-        return self.data
+class Name(Field):
+    pass
+
+
+class Phone(Field):
+    pass
 
 
 class Record:
     """Class for creating contacts"""
 
-    def __init__(self, name, phone=None):
+    def __init__(self, name: Name, phone: Phone = None):
         self.name = name
-        if phone is None:
-            self.phone = []
+        self.phones = []
+        if isinstance(phone, Phone):
+            self.phones.append(phone)
 
     def add_phone(self, phone):
         self.phone.append(phone)
@@ -32,33 +34,33 @@ class Record:
         self.phones = []
 
     def show_contact(self):
-        return {"name": self.name, "phone": self.phone}
+        return {"name": self.name, "phone": self.phones}
 
 
-class Field:
-    pass
+class AddressBook(UserDict):
+    """Class for creating addressbooks"""
+
+    def add_record(self, record: Record):
+        self.data[record.name.value] = record
+
+    def remove_record(self, record):
+        self.data.pop(record.name.value, None)
+
+    def show_records(self):
+        return self.data
 
 
-class Name(Field):
-    pass
+if __name__ == '__main__':
+    name = Name('Bill')
+    phone = Phone('1234567890')
+    rec = Record(name, phone)
+    ab = AddressBook()
+    ab.add_record(rec)
 
+    assert isinstance(ab['Bill'], Record)
+    assert isinstance(ab['Bill'].name, Name)
+    assert isinstance(ab['Bill'].phones, list)
+    assert isinstance(ab['Bill'].phones[0], Phone)
+    assert ab['Bill'].phones[0].value == '1234567890'
 
-class Phone(Field):
-    pass
-
-
-# sasha = Record("Sasha")
-
-# sasha.add_phone("0678742845")
-# sasha.add_phone("0971111111")
-# sasha.change_phone("0665555555")
-# sasha.delete_phone()
-# print(sasha.show_contact())
-
-# my_book = AddressBook()
-
-# my_book.add_record(sasha)
-# print(my_book.show_records())
-# my_book.remove_record(sasha)
-# my_book.add_record(sasha)
-# print(my_book.show_records())
+    print('All Ok)')
