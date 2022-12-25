@@ -1,6 +1,6 @@
 import pickle
 import re
-from Classes import address_book, Record
+from Classes import address_book, Record, Name
 from exceptions import input_error
 
 
@@ -36,16 +36,17 @@ def say_goodbye(s=None):
 def add_contact(value):
     """ Add new contact to address book"""
     name, *phones = value.lower().strip().split()
+    name = Name(name.lower().title())
 
-    if not name.title() in address_book:
+    if not name.value in address_book:
         record = Record(name)
         address_book.add_record(record)
         for phone in phones:
             record.add_phone(phone)
             save_to_pickle()
-        return f"Contact {name.title()} was created"
+        return f"Contact {name.value.title()} was created"
     else:
-        return f"Contact {name.title()} already exists"
+        return f"Contact {name.value.title()} already exists"
 
 
 @input_error
@@ -55,6 +56,7 @@ def add_phone(value):
     if name.title() in address_book:
         address_book[name.title()].add_phone(phone)
         save_to_pickle()
+        return f"The phone number for {name.title()} was wrote"
     else:
         return f"Contact {name.title()} does not exist"
 
@@ -79,6 +81,7 @@ def add_contact_birthday(value):
     if name.title() in address_book:
         address_book[name.title()].add_birthday(*birthday)
         save_to_pickle()
+        return f"The Birthday for {name.title()} was wrote"
     else:
         return f"Contact {name.title()} does not exists"
 
@@ -99,8 +102,9 @@ def days_to_birthday(name):
 def change_ph(value: str):
     name, old_phone, new_phone = value.split()
 
-    if name.title() in address_book:
-        address_book[name.title()].change_phone(old_phone, new_phone)
+    if name.strip().lower().title() in address_book:
+        address_book[name.strip().lower().title()].change_phone(
+            old_phone, new_phone)
         save_to_pickle()
     else:
         return f"Contact {name.title()} does not exists"
@@ -108,9 +112,8 @@ def change_ph(value: str):
 
 @input_error
 def remove_contact(name: str):
-    record = address_book[name.title()]
-    print(record)
-    address_book.remove_record(record)
+    record = address_book[name.strip().lower().title()]
+    address_book.remove_record(record.name.value)
     save_to_pickle()
     return f"Contact {name.title()} was removed"
 
@@ -135,7 +138,7 @@ def show_all(s):
 
 def help(value):
     rules = """List of commands:
-    1) to add new contact and one or more phones, write command: add contact {name} {phone number} {phone number} {phone number}
+    1) to add new contact and one or more phones, write command: add {name} {phone number} {phone number} {phone number}
     2) to remove contact, write command: remove contact {name}
 
     3) to add phone, write command: add phone {name} {one phone}
@@ -157,13 +160,13 @@ def help(value):
 
 # Словник, де ключі - ключові слова в командах, а значення - функції, які при цих командах викликаються
 commands = {
-    "add contact": add_contact,
     "remove contact": remove_contact,
     "add phone": add_phone,
     "change phone": change_ph,
     "remove phone": remove_phone,
     "add birthday": add_contact_birthday,
     "days to birthday": days_to_birthday,
+    "add": add_contact,
     "search": search,
     "phone": contact,
     "show all": show_all,
@@ -186,8 +189,7 @@ def main():
 
         for key in commands:
             if command.lower().strip().startswith(key):
-                print(commands[key]
-                      (command[len(key):].strip()))
+                print(commands[key](command[len(key):].strip()))
                 break
 
 

@@ -13,33 +13,33 @@ class LetterInPhoneError(Exception):
 
 
 class Field:
+    """ Class for creating fields """
 
     def __init__(self, value):
-        self.__name = value
+        self._value = value.strip().lower().title()
 
     def __str__(self):
-        return self.__name
+        return self._value
 
     @property
-    def name(self):
-        return self.__name
+    def value(self):
+        return self._value
 
-    @name.setter
-    def name(self, value):
-        self.__name = value
+    @value.setter
+    def value(self, value):
+        self._value = value.strip().lower()
 
 
 class Name(Field):
+    """Class for creating fields 'name' """
 
-    @Field.name.setter
-    def name(self, value):
-        self.__name = value.title()
+    @Field.value.setter
+    def value(self, value):
+        self._value = value.strip().lower().title()
 
 
 class Phone(Field):
-
-    def __init__(self, phone):
-        self.__phone = phone
+    """ Class for creating fields 'phone' """
 
     @staticmethod
     def sanitize_phone_number(phone):
@@ -61,19 +61,16 @@ class Phone(Field):
                 raise WrongLengthPhoneError(
                     "Length of the phone's number is wrong")
 
-    def __str__(self):
-        return self.__phone
+    def __init__(self, value):
+        self._value = Phone.sanitize_phone_number(value)
 
-    @property
-    def phone(self):
-        return self.__phone
-
-    @phone.setter
-    def phone(self, phone):
-        self.__phone = Phone.sanitize_phone_number(phone)
+    @Field.value.setter
+    def value(self, value):
+        self._value = Phone.sanitize_phone_number(value)
 
 
 class Birthday(datetime):
+    """ Class for creating fields 'birthday' """
 
     @staticmethod
     def validate_date(year, month, day):
@@ -97,16 +94,15 @@ class Birthday(datetime):
 
 
 class AddressBook(UserDict):
-    """Class for creating addressbooks"""
-
-    def __init__(self):
-        super().__init__()
+    """ Class for creating addressbooks """
 
     def add_record(self, record):
-        self.data[str(record.name)] = record
+        self.data[record.name.value] = record
 
-    def remove_record(self, record):
-        self.data.pop(str(record.name), None)
+    def remove_record(self, name):
+        name = name.lower().title()
+        if name in self.data:
+            self.data.pop(name)
 
     def all_records(self):
         return {key: value.get_contact() for key, value in self.data.items()}
@@ -117,19 +113,18 @@ class AddressBook(UserDict):
 
 
 class Record:
-    """Class for creating contacts"""
+    """ Class for creating contacts """
 
-    def __init__(self, name, phone=None, birthday=None):
-        self.name = Name(name.title())
+    def __init__(self, name: Name, phone: Phone = None, birthday=None):
+        self.name = name
         if birthday is not None:
             self.birthday = Birthday(birthday)
         else:
             self.birthday = None
 
-        if phone is None:
-            self.phones = []
-        else:
-            self.phones = [Phone(phone)]
+        self.phones = []
+        if phone:
+            self.phones.append(phone)
 
     def days_to_bd(self):
         cur_date = datetime.now().date()
@@ -154,37 +149,38 @@ class Record:
         self.birthday = Birthday.validate_date(int(year), int(month), int(day))
 
     def add_phone(self, phone):
-        phone = Phone.sanitize_phone_number(phone)
+        phone = Phone(phone)
         if phone:
-            lst = [phone.phone for phone in self.phones]
-            if phone not in lst:
-                self.phones.append(Phone(phone))
+            lst = [phone.value for phone in self.phones]
+            if phone.value not in lst:
+                self.phones.append(phone)
                 return "Phone was added"
         else:
             raise ValueError("Phone number is not correct")
 
     def change_phone(self, old_phone, new_phone):
-        old_phone = Phone.sanitize_phone_number(old_phone)
-        new_phone = Phone.sanitize_phone_number(new_phone)
+        old_phone = Phone(old_phone)
+        new_phone = Phone(new_phone)
 
         for phone in self.phones:
-            if phone.phone == old_phone:
-                phone.phone = new_phone
+            if phone.value == old_phone.value:
+                self.phones.remove(phone)
+                self.phones.append(new_phone)
                 return "phone was changed"
 
-    def delete_phone(self, phone):
-        phone = Phone.sanitize_phone_number(phone)
-        for ph in self.phones:
-            if ph.phone == phone:
-                self.phones.remove(ph)
+    def delete_phone(self, old_phone):
+        old_phone = Phone(old_phone)
+        for phone in self.phones:
+            if phone.value == old_phone.value:
+                self.phones.remove(phone)
 
     def get_contact(self):
         phones = ", ".join([str(p) for p in self.phones])
         return {
-            "name": str(self.name),
+            "name": str(self.name.value),
             "phone": phones,
             "birthday": self.birthday
-        }
+            }
 
 
 p = Path("address_book.bin")
