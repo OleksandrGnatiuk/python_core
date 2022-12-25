@@ -5,11 +5,11 @@ from pathlib import Path
 
 
 class WrongLengthPhoneError(Exception):
-    """ Exception for wrong length of the phone number"""
+    """ Exception for wrong length of the phone number """
 
 
 class LetterInPhoneError(Exception):
-    """ Exception when a letter ts in the phone number"""
+    """ Exception when a letter is in the phone number """
 
 
 class Field:
@@ -27,11 +27,11 @@ class Field:
 
     @value.setter
     def value(self, value):
-        self._value = value.strip().lower()
+        self._value = value.strip().lower().title()
 
 
 class Name(Field):
-    """Class for creating fields 'name' """
+    """ Class for creating fields 'name' """
 
     @Field.value.setter
     def value(self, value):
@@ -91,25 +91,6 @@ class Birthday(datetime):
     @birthday.setter
     def birthday(self, year, month, day):
         self.__birthday = self.validate_date(year, month, day)
-
-
-class AddressBook(UserDict):
-    """ Class for creating addressbooks """
-
-    def add_record(self, record):
-        self.data[record.name.value] = record
-
-    def remove_record(self, name):
-        name = name.lower().title()
-        if name in self.data:
-            self.data.pop(name)
-
-    def all_records(self):
-        return {key: value.get_contact() for key, value in self.data.items()}
-
-    def iterator(self):
-        for record in self.data.values():
-            yield record.get_contact()
 
 
 class Record:
@@ -180,7 +161,26 @@ class Record:
             "name": str(self.name.value),
             "phone": phones,
             "birthday": self.birthday
-            }
+        }
+
+
+class AddressBook(UserDict):
+    """ Class for creating addressbooks """
+
+    def add_record(self, record: Record):
+        self.data[record.name.value] = record
+
+    def remove_record(self, name):
+        name = name.lower().title()
+        if name in self.data:
+            self.data.pop(name)
+
+    def all_records(self):
+        return {key: value.get_contact() for key, value in self.data.items()}
+
+    def iterator(self):
+        for record in self.data.values():
+            yield record.get_contact()
 
 
 p = Path("address_book.bin")

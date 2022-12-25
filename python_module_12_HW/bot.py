@@ -13,7 +13,7 @@ def save_to_pickle():
 
 @input_error
 def search(value: str):
-    """Search contact where is 'text' in fields: name, phone"""
+    """ Search contact where there is 'text' in the fields: name and phone """
 
     for record in address_book:
         contact = address_book[record]
@@ -34,7 +34,8 @@ def say_goodbye(s=None):
 
 @input_error
 def add_contact(value):
-    """ Add new contact to address book"""
+    """ Add new contact to address book """
+
     name, *phones = value.lower().strip().split()
     name = Name(name.lower().title())
 
@@ -56,7 +57,7 @@ def add_phone(value):
     if name.title() in address_book:
         address_book[name.title()].add_phone(phone)
         save_to_pickle()
-        return f"The phone number for {name.title()} was wrote"
+        return f"The phone number for {name.title()} was recorded"
     else:
         return f"Contact {name.title()} does not exist"
 
@@ -81,7 +82,7 @@ def add_contact_birthday(value):
     if name.title() in address_book:
         address_book[name.title()].add_birthday(*birthday)
         save_to_pickle()
-        return f"The Birthday for {name.title()} was wrote"
+        return f"The Birthday for {name.title()} was recorded"
     else:
         return f"Contact {name.title()} does not exists"
 
